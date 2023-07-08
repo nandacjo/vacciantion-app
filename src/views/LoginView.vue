@@ -6,7 +6,7 @@
     <form @submit.prevent="submit">
       <div class="row">
         <div class="col-md-4">
-          <div v-if="message_error_login > 0" class="alert alert-danger">
+          <div v-if="message_error_login" class="alert alert-danger">
             <span>{{ message_error_login }}</span>
           </div>
           <div class="form-group">
@@ -31,7 +31,7 @@
           <div class="form-group">
             <label class="form-label">Password</label>
             <input
-              type="text"
+              type="password"
               class="form-control"
               v-model="password"
               placeholder="Fill Password"
@@ -66,6 +66,7 @@ export default {
     };
   },
   methods: {
+
     submit() {
       var vue = this;
       vue.message_error_login = "";
@@ -76,7 +77,9 @@ export default {
       xhr.onload = () => {
         if (xhr.status === 400) {
           var response = JSON.parse(xhr.response);
+          console.log(response);
           var keys = Object.keys(response);
+          console.log(keys);
           keys.forEach((key) => {
             var text = "";
             response[key].forEach((value) => {
@@ -89,6 +92,7 @@ export default {
           vue.message_error_login = response.message;
         } else if (xhr.status == 200) {
           var response = JSON.parse(xhr.response);
+          localStorage.setItem("loginSuccessMessage", response.message);
           localStorage.setItem("user", btoa(JSON.stringify(response)));
           vue.$router.go(); // refresh halaman
         }

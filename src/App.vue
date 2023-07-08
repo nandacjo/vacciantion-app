@@ -43,13 +43,14 @@ export default {
   // Fungsi mounted di pangggil ketika semua tampilan hatmlnya di render
   // dan akan mengisi var user yang ada di dalam di data
   mounted() {
-    this.iniUser();
+    this.initUser();
+    this.checkSuccessMessage();
   },
 
   // Fungsi watch ketika ada perubahahn langsung otomatis ada actionnya
   watch: {
     $route() {
-      this.$nextTick(this.iniUser);
+      this.$nextTick(this.initUser);
     },
   },
 
@@ -60,7 +61,15 @@ export default {
     };
   },
   methods: {
-    iniUser() {
+    checkSuccessMessage() {
+      const message = localStorage.getItem("loginSuccessMessage");
+      if (message) {
+        this.message_success_post = message;
+        localStorage.removeItem("loginSuccessMessage");
+      }
+    },
+
+    initUser() {
       if (localStorage.getItem("user") !== null) {
         this.user = JSON.parse(atob(localStorage.getItem("user")));
       }
@@ -79,20 +88,22 @@ export default {
         if (xhr.status == 401) {
           localStorage.removeItem("user");
           vue.user = {};
-          vue.$router.go();
+          this.$router.go();
         } else if (xhr.status == 200) {
           var response = JSON.parse(xhr.response);
           vue.message_success_post = response.message;
-
           setTimeout(() => {
             localStorage.removeItem("user");
             vue.user = {};
-            vue.$route.go();
+            this.$router.go();
           }, 2000);
         }
       };
 
-      xhr.open("POST", this.$apiURL + "auth/logout?token=" + this.user.token);
+      xhr.open(
+        "POST",
+        this.$apiURL + "auth/logout?token=" + this.user.data.token
+      );
       xhr.send(null);
     },
   },
